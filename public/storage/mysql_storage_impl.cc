@@ -48,21 +48,41 @@ bool MysqlStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist){
 bool MysqlStorageEngineImpl::Release(){
 
 	FreeRes();
-    return true;
+  if (NULL != conn_.get()->proc) {
+    mysql_close((MYSQL*)conn_.get()->proc);
+    conn_.get()->proc = NULL;
+    MIG_INFO(USER_LEVEL, "release mysql resource");
+  }
+  return true;
+  
 }
 
-bool MysqlStorageEngineImpl::FreeRes(){
-    MYSQL_RES * result = (MYSQL_RES *)result_.get()->proc;
-    if(NULL == result)
-        return true;
+bool  MysqlStorageEngineImpl::FreeRes() {
+  MYSQL_RES *result = (MYSQL_RES *)result_.get()->proc;
+  MYSQL *mysql = (MYSQL*)conn_.get()->proc;
+  int status = 0;
+  if (NULL != result) {
     mysql_free_result(result);
-    MYSQL* mysql = (MYSQL*)conn_.get()->proc;
-    while(!mysql_next_result(mysql)) {
-		result = mysql_store_result(mysql);
-		mysql_free_result(result);
-        }
     result_.get()->proc = NULL;
-    return true;
+  }
+
+  do {
+    result = mysql_store_result(mysql);
+    if (NULL != result) {
+      mysql_free_result(result);
+      result_.get()->proc = NULL;
+    } else {
+      if (mysql_field_count(mysql) == 0) {
+        MIG_LOG(USER_LEVEL, "%lld rows affected", mysql_affected_rows(mysql));
+      } else {
+        MIG_LOG(USER_LEVEL, "Could not retrieve result set");
+      }
+    }
+    if ((status = mysql_next_result(mysql)) > 0)
+      MIG_LOG(USER_LEVEL, "Could not execute statement");
+  }while (0 == status);
+
+  return true;
 }
 
 bool MysqlStorageEngineImpl::SQLExec(const char* sql){

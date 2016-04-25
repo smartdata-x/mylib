@@ -5,7 +5,7 @@
  *      Author: kerry
  */
 #include "queue_dic_comm.h"
-#include "dic/base_dic_redis_auto.h"
+#include "database/dic/base_dic_redis_auto.h"
 namespace base_queue{
 
 

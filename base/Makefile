@@ -41,7 +41,8 @@ COMPILE = $(COMPIlER) $(CPP_FLAG) $(INCLUDE_PATHS) -o $@
 LINK = $(AR)  $(OUTPUT_FILE) $?
 
 all: clean output delete-temp-file
-output:	basic_util.o icu_utf.o base_db_mysql_auto.o base_dic_redis_auto.o\
+output:	basic_util.o icu_utf.o base_db_mysql_auto.o base_dic_redis_auto.o \
+	mysql_controller.o storage_controller_engine.o \
 	basic_lbs_info.o lbs_baidu_connector.o lbs_dic_comm.o location_server.o\
 	kafka_consumer.o kafka_producer.o xml_serializer.o\
 	block_msg_queue.o  queue_dic_comm.o lbs_connector.o string_escape.o\
@@ -65,10 +66,16 @@ delete-temp-file:
 ### 编译
 
 base_dic_redis_auto.o:
-	$(COMPILE) ./dic/base_dic_redis_auto.cc
+	$(COMPILE) ./database/dic/base_dic_redis_auto.cc
 	
 base_db_mysql_auto.o:
-	$(COMPILE) ./db/base_db_mysql_auto.cc
+	$(COMPILE) ./database/db/base_db_mysql_auto.cc
+
+mysql_controller.o:
+	$(COMPILE) ./database/storage/mysql_controller.cc
+
+storage_controller_engine.o:
+	$(COMPILE) ./database/storage/storage_controller_engine.cc
 
 basic_lbs_info.o:
 	$(COMPILE) ./lbs/basic_lbs_info.cc

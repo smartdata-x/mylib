@@ -29,6 +29,9 @@ bool MysqlStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist){
     		                  /*CLIENT_INTERACTIVE*/CLIENT_MULTI_STATEMENTS)==NULL){
             MIG_ERROR(USER_LEVEL,"mysql:connection to database failed failed %s",
                       mysql_error(mysql));
+            MIG_INFO(USER_LEVEL, "mysql ip[%s] port[%d] user[%s] pwd[%s]",
+                     addr.host().c_str(), addr.port(), addr.usr().c_str(),
+                     addr.pwd().c_str(), addr.source().c_str());
     		return false;
     	}
         
@@ -41,6 +44,11 @@ bool MysqlStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist){
     mysql_set_server_option(mysql, MYSQL_OPTION_MULTI_STATEMENTS_ON);
     mysql_query(mysql,"SET NAMES 'binary'");
     connected_ = true;
+    
+    if (NULL != conn_.get()->proc) {
+      mysql_close((MYSQL*)conn_.get()->proc);
+      conn_.get()->proc = NULL;
+    }
     conn_.get()->proc = mysql;
     return true;
 }
@@ -48,21 +56,42 @@ bool MysqlStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist){
 bool MysqlStorageEngineImpl::Release(){
 
 	FreeRes();
-    return true;
+  return true;
 }
 
-bool MysqlStorageEngineImpl::FreeRes(){
-    MYSQL_RES * result = (MYSQL_RES *)result_.get()->proc;
-    if(NULL == result)
-        return true;
+bool  MysqlStorageEngineImpl::FreeRes() {
+  MYSQL_RES *result = (MYSQL_RES *)result_.get()->proc;
+  MYSQL *mysql = (MYSQL*)conn_.get()->proc;
+  int status = 0;
+  if (NULL != result) {
     mysql_free_result(result);
-    MYSQL* mysql = (MYSQL*)conn_.get()->proc;
-    while(!mysql_next_result(mysql)) {
-		result = mysql_store_result(mysql);
-		mysql_free_result(result);
-        }
     result_.get()->proc = NULL;
+   // MIG_DEBUG(USER_LEVEL, "delete mysql result: %p", result);
+  } else {
     return true;
+  }
+
+  do {
+    result = mysql_store_result(mysql);
+    //  MIG_DEBUG(USER_LEVEL, "new mysql result: %p", result);
+    if (NULL != result) {
+      mysql_free_result(result);
+    //  MIG_DEBUG(USER_LEVEL, "delete mysql result: %p", result);
+    } else {
+      if (mysql_field_count(mysql) == 0) {
+        MIG_LOG(USER_LEVEL, "%lld rows affected", mysql_affected_rows(mysql));
+      } else {
+        MIG_LOG(USER_LEVEL, "Could not retrieve result set");
+        MIG_LOG(USER_LEVEL, "mysql error code [%d] [%s]",
+            mysql_error(mysql), mysql_error(mysql));
+       //  break;
+      }
+    }
+    if ((status = mysql_next_result(mysql)) > 0)
+      MIG_LOG(USER_LEVEL, "Could not execute statement");
+  }while (0 == status);
+
+  return true;
 }
 
 bool MysqlStorageEngineImpl::SQLExec(const char* sql){

@@ -52,7 +52,7 @@ output:	basic_util.o base64.o icu_utf.o base_db_mysql_auto.o base_dic_redis_auto
 	storage.o mem_storage_impl.o mysql_storage_impl.o redis_storage_impl.o\
 	redis_warrper.o http_method.o http_method.o mig_log.o\
 	file_util.o file_path.o config.o\
-	constants.o basic_info.o basictypes.o algo_tea.o data_packet.o
+	constants.o basic_info.o basictypes.o algo_tea.o data_packet.o native_library.o
 	$(LINK)
 
 clean:
@@ -243,6 +243,7 @@ file_util.o:
 #日志
 mig_log.o:
 	$(COMPILE) $(THIRD_PATH)/log/mig_log.cc
-	
 
-
+#加载动态库
+native_library.o:
+	$(COMPILE) $(THIRD_PATH)/basic/native_library.cc

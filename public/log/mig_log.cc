@@ -91,7 +91,6 @@ int log_impl (const char *file, const int line, const char *func, int level, int
     int facility1 = LOG_LOCAL6;
     int facility2 = _facility;
 
-    printf("facility1 %d  facility2 %d",facility1,facility2);
     if (level == SYSTEM_LEVEL)
         openlog (_prog_name, LOG_PID|LOG_CONS|LOG_NDELAY, _LOG_SYSTEM);
     else

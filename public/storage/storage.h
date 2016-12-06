@@ -140,7 +140,7 @@ public:
 	
 	virtual uint32 RecordCount() = 0;
 	
-    virtual bool FreeRes() = 0;
+  virtual bool FreeRes() = 0;
     
 	virtual db_row_t* FetchRows(void) = 0;//get Recordset
 	

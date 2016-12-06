@@ -2,12 +2,15 @@
 #include "log/mig_log.h"
 namespace base_storage {
 
-MysqlStorageEngineImpl::MysqlStorageEngineImpl() {
+MysqlStorageEngineImpl::MysqlStorageEngineImpl()
+:connected_(false){
 
   conn_.reset(new db_conn_t);
   result_.reset(new db_res_t);
   rows_.reset(new db_row_t);
-  conn_.get()->proc = result_.get()->proc = rows_.get()->proc = NULL;
+  conn_.get()->proc = NULL;
+  result_.get()->proc = NULL;
+  rows_.get()->proc = NULL;
 }
 
 MysqlStorageEngineImpl::~MysqlStorageEngineImpl() {
@@ -49,6 +52,12 @@ bool MysqlStorageEngineImpl::Connections(std::list<base::ConnAddr>& addrlist) {
 bool MysqlStorageEngineImpl::Release() {
 
   FreeRes();
+
+  MYSQL* mysql = (MYSQL*)(conn_.get()->proc);
+  mysql_close(mysql);
+  conn_.get()->proc = NULL;
+  result_.get()->proc = NULL;
+  rows_.get()->proc = NULL;
   return true;
 }
 
@@ -107,6 +116,15 @@ bool MysqlStorageEngineImpl::SQLExecs(std::list<std::string>& sqls) {
   mysql_autocommit(mysql, 1);
   return true;
 }
+
+
+uint32 MysqlStorageEngineImpl::RecordCount(){
+    //unsigned long ulCount = (unsigned long)mysql_num_rows((MYSQL_RES *)(result_.get()->proc));
+  unsigned long ulCount = (unsigned long)mysql_affected_rows((MYSQL*)conn_.get()->proc);
+  MIG_DEBUG(USER_LEVEL,"ulconut ==%d===\n",ulCount);
+  return ulCount;
+}
+
 
 bool MysqlStorageEngineImpl::Affected(unsigned long& rows) {
   rows = (unsigned long) mysql_affected_rows((MYSQL*) conn_.get()->proc);

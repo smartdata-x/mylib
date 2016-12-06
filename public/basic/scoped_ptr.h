@@ -13,13 +13,15 @@ public:
 
 	~scoped_ptr(){
 		enum{type_must_be_complete = sizeof(C)};
-		delete ptr_;
+		if (ptr_ != NULL)
+		  delete ptr_;
 	}
 
 	void reset(C* p = NULL){
 		if(p!=ptr_){
 			enum{ type_must_be_complete = sizeof(C)};
-			delete ptr_;
+			if (ptr_ != NULL)
+			  delete ptr_;
 			ptr_ = p;
 		}
 	}

@@ -41,6 +41,18 @@ namespace base{
 		return true;
 	}
 
+
+
+  template<typename MapType, typename MapTypeIT, typename KeyType,typename ValType>
+  static bool MapAddIsExist(MapType &map,KeyType id,const ValType &val)
+  {
+    MapTypeIT it = map.find (id);
+    if (it != map.end ())
+      return false;
+    map[id] = val;
+    return true;
+  }
+
 	template <typename MapType, typename MapTypeIT>
 	static bool MapDel (MapType &map, int idx)
 	{

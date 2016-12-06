@@ -80,11 +80,11 @@ int kafka_consumer::PullData(std::string& data) {
   if (rkmessage->err) {
     if (rkmessage->err == RD_KAFKA_RESP_ERR__UNKNOWN_PARTITION
         || rkmessage->err == RD_KAFKA_RESP_ERR__UNKNOWN_TOPIC) {
-      LOG_MSG2("kafka message error %s",rd_kafka_err2str(rkmessage->err));
+      //LOG_MSG2("kafka message error %s",rd_kafka_err2str(rkmessage->err));
       return rkmessage->err;
-    } LOG_MSG2("kafka message error %s",rd_kafka_err2str(rkmessage->err));
+    } //LOG_MSG2("kafka message error %s",rd_kafka_err2str(rkmessage->err));
     return rkmessage->err;
-  } LOG_MSG2("payload%s,len%d offset=%lld\n", (const char*)rkmessage->payload, (int)rkmessage->len, rkmessage->offset);
+  } //LOG_MSG2("payload%s,len%d offset=%lld\n", (const char*)rkmessage->payload, (int)rkmessage->len, rkmessage->offset);
   data = std::string((const char*) rkmessage->payload, rkmessage->len);
   rd_kafka_message_destroy(rkmessage);
 

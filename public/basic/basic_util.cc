@@ -255,9 +255,13 @@ std::string BasicUtil::StringUtil::Int64ToString(int64 value) {
 }
 
 std::string BasicUtil::StringUtil::DoubleToString(double value){
-	char buffer[32];
+	/*char buffer[32];
 	dmg_fp::g_fmt(buffer,value);
-	return std::string(buffer);
+	return std::string(buffer);*/
+  std::stringstream os;
+  os << value;
+  std::string tp = os.str();
+  return tp;
 }
 
 std::wstring BasicUtil::StringUtil::DobleToWString(double value){

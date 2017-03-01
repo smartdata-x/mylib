@@ -92,8 +92,8 @@ int kafka_producer::PushData(const char* buf, const int buf_len) {
 
 int kafka_producer::PushData(base_logic::Value* data) {
   std::string json_str;
-  base_logic::ValueSerializer* engine = base_logic::ValueSerializer::Create(
-      0, &json_str);
+  scoped_ptr<base_logic::ValueSerializer> engine(base_logic::ValueSerializer::Create(
+      0, &json_str));
   engine->Serialize(*data);
   return PushData(json_str.c_str(), json_str.size());
 }

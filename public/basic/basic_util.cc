@@ -200,8 +200,7 @@ bool BasicUtil::StringUtil::StringToInt64(const std::string& input,int64* output
 bool BasicUtil::StringUtil::StringToDouble(const std::string& input,double* output){
 	//return StringToNumber<StringToDoubleTraits>(input,output);
   if (!input.empty()){
-    double lo = atof(input.c_str());
-    output = &lo;
+    *output = atof(input.c_str());
     return true;
   } else {
     output = NULL;

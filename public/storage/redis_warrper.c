@@ -18,9 +18,11 @@ int RedisSelectDB(warrper_redis_context_t** context,
 
   /* Switch to db_name for testing, now that we know we can chat. */
   reply = redisCommand((*context)->context,"SELECT %s", db_name);
-    assert(reply != NULL);
-      freeReplyObject(reply);
-        return 1;
+  if (reply == NULL) {
+    return 0;
+  }
+  freeReplyObject(reply);
+  return 1;
 }
 
 int RedisAddValue(warrper_redis_context_t* context,
